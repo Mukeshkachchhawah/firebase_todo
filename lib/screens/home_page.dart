@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_todo_ui/provider/provider.dart';
+import 'package:firebase_todo_ui/screens/update.dart';
+import 'package:firebase_todo_ui/ui_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -115,11 +117,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future UpdateTodo(DocumentSnapshot? documentSnapshot) {
-    if (documentSnapshot != null) {
-      titleController = documentSnapshot['title'];
-      deseController = documentSnapshot['desc'];
-    }
+  Future UpdateTodo() {
     return showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -159,17 +157,7 @@ class _HomePageState extends State<HomePage> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10))),
                 ),
-                /*   SizedBox(
-                  height: 20,
-                ),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  controller: numberController,
-                  decoration: InputDecoration(
-                      hintText: "Number",
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10))),
-                ), */
+               
                 SizedBox(
                   height: 20,
                 ),
@@ -179,10 +167,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         print("hello");
 
-                        db
-                            .collection('Notes')
-                            .doc(documentSnapshot!.id)
-                            .update({
+                        db.collection('Notes').doc().update({
                           "title": titleController.text,
                           "desc": deseController.text
                         });
@@ -238,7 +223,14 @@ class _HomePageState extends State<HomePage> {
                 var notesData = snapshot.data!.docs[index];
                 return InkWell(
                   onTap: () {
-                    UpdateTodo(notesData.id as DocumentSnapshot<Object?>?);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => UpdateNotes(
+                              id: ID,
+                              name: notesData['title'],
+                              desc: notesData['desc']),
+                        ));
                     //  UpdateTodo(notesData.id as DocumentSnapshot<Object?>?);
                   },
                   child: Card(

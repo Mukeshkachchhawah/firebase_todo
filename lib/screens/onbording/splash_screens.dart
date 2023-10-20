@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:firebase_todo_ui/screens/home_page.dart';
-import 'package:firebase_todo_ui/screens/onbording/user_ccount/email_password/sign_in.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_todo_ui/screens/onbording/user_ccount/email_password/sign_up.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,13 +17,17 @@ class _SplashScreenState extends State<SplashScreen> {
     // TODO: implement initState
     super.initState();
     Timer(Duration(seconds: 4), () {
-      Navigator.push(
+      Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => SignScreens(),
+            builder: (context) => SignUp(),
           ));
     });
   }
+
+  // void SherPref()async{
+  //  final SharedPreferences pref = await SharedPreferences.getInstance();
+  // }
 
   @override
   Widget build(BuildContext context) {

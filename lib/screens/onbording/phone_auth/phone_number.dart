@@ -1,11 +1,20 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_todo_ui/ui_helper.dart';
 import 'package:flutter/material.dart';
 
 import 'otp_screen.dart';
 
-class PhoneNumber extends StatelessWidget {
+class PhoneNumber extends StatefulWidget {
   const PhoneNumber({super.key});
 
+  @override
+  State<PhoneNumber> createState() => _PhoneNumberState();
+}
+
+class _PhoneNumberState extends State<PhoneNumber> {
+   var auth = FirebaseAuth.instance;
+  var phoneNoController = TextEditingController();
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,9 +46,36 @@ class PhoneNumber extends StatelessWidget {
             Text("Country Code"),
             CustomTextFild(),
             hSpacher(mHeight: 50.0),
-            CustomContainer("Send OTP", Colors.blueGrey, () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => OTPScreens(),));
-            },)
+            CustomContainer(
+              "Send OTP",
+              Colors.blueGrey,
+              () {
+// add firebase phone number auth..
+               
+                auth.verifyPhoneNumber(
+                  phoneNumber: "91${phoneNoController.text.toString()}",
+                  verificationCompleted: (phoneAuthCredential) {
+                    auth
+                        .signInWithCredential(phoneAuthCredential)
+                        .then((value) {
+                      print("Auto sign in Complated! ... ${value.user!.uid}");
+                    });
+                  },
+                  verificationFailed: (error) {
+                    print("Varification Failded ${error.message}");
+                  },
+                  codeSent: (verificationId, forceResendingToken) {
+                    //// send otp screens
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OTPScreens(mVerification:  verificationId,),
+                        ));
+                  },
+                  codeAutoRetrievalTimeout: (verificationId) {},
+                );
+              },
+            )
           ],
         ),
       ),
@@ -59,9 +95,14 @@ class PhoneNumber extends StatelessWidget {
         Expanded(
             flex: 7,
             child: TextField(
+              controller: phoneNoController,
+              keyboardType: TextInputType.number,
               decoration: InputDecoration(hintText: "Phone Number"),
             ))
       ],
     );
   }
+
+
+
 }

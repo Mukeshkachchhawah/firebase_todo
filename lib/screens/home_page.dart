@@ -1,12 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_todo_ui/provider/provider.dart';
-import 'package:firebase_todo_ui/screens/update.dart';
 import 'package:firebase_todo_ui/ui_helper.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,6 +18,9 @@ class _HomePageState extends State<HomePage> {
 
   late TextEditingController titleController = TextEditingController();
   late TextEditingController deseController = TextEditingController();
+
+  File? file;
+  ImagePicker image = ImagePicker();
 
   @override
   void initState() {
@@ -75,17 +76,7 @@ class _HomePageState extends State<HomePage> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10))),
                 ),
-                /*   SizedBox(
-                  height: 20,
-                ),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  controller: numberController,
-                  decoration: InputDecoration(
-                      hintText: "Number",
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10))),
-                ), */
+
                 SizedBox(
                   height: 20,
                 ),
@@ -94,8 +85,6 @@ class _HomePageState extends State<HomePage> {
                   child: ElevatedButton(
                       onPressed: () {
                         print("hello");
-                        // final String Name = titleController.text;
-                        // final String SubTitle = deseController.text;
 
 //// data get
                         db.collection('Notes').add({
@@ -117,7 +106,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future UpdateTodo() {
+  /// Update Notes
+  Future UpdateTodo(String id, String mtitle, String mdesc) {
+    titleController.text = mtitle;
+    deseController.text = mdesc;
+
     return showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -157,7 +150,7 @@ class _HomePageState extends State<HomePage> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10))),
                 ),
-               
+
                 SizedBox(
                   height: 20,
                 ),
@@ -167,7 +160,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         print("hello");
 
-                        db.collection('Notes').doc().update({
+                        db.collection('Notes').doc(id).update({
                           "title": titleController.text,
                           "desc": deseController.text
                         });
@@ -183,6 +176,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// delet Notes
   Future<void> deletTodo(String itemId) async {
     await db.collection('Notes').doc(itemId).delete();
   }
@@ -193,6 +187,13 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text("FireBase Todo"),
         actions: [
+          InkWell(
+            onTap: getCameraPic,
+            child: Icon(Icons.camera)),
+          wSpacher(),
+          InkWell(
+            onTap: getGalleryPic,
+            child: Icon(Icons.browse_gallery)),
           Container(
               margin: EdgeInsets.all(10),
               height: 50,
@@ -223,15 +224,9 @@ class _HomePageState extends State<HomePage> {
                 var notesData = snapshot.data!.docs[index];
                 return InkWell(
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UpdateNotes(
-                              id: ID,
-                              name: notesData['title'],
-                              desc: notesData['desc']),
-                        ));
-                    //  UpdateTodo(notesData.id as DocumentSnapshot<Object?>?);
+                    // call update Function
+                    UpdateTodo(
+                        notesData.id, notesData['title'], notesData['desc']);
                   },
                   child: Card(
                     child: ListTile(
@@ -255,5 +250,13 @@ class _HomePageState extends State<HomePage> {
         },
       ),
     );
+  }
+
+  void getCameraPic() async {
+    var images = await image.pickImage(source: ImageSource.camera);
+  }
+
+  void getGalleryPic() async {
+    var images = await image.pickImage(source: ImageSource.gallery);
   }
 }

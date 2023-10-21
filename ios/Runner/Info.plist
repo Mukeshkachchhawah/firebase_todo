@@ -45,5 +45,12 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To get update the user profile </string>
+	<key>NSCameraUsageDescription</key>
+	<string>To get update the user profile camera photo</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To get update the user profile Micropone</string>
+
 </dict>
 </plist>

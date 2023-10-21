@@ -12,9 +12,9 @@ class PhoneNumber extends StatefulWidget {
 }
 
 class _PhoneNumberState extends State<PhoneNumber> {
-   var auth = FirebaseAuth.instance;
+  var auth = FirebaseAuth.instance;
   var phoneNoController = TextEditingController();
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,9 +51,9 @@ class _PhoneNumberState extends State<PhoneNumber> {
               Colors.blueGrey,
               () {
 // add firebase phone number auth..
-               
+
                 auth.verifyPhoneNumber(
-                  phoneNumber: "91${phoneNoController.text.toString()}",
+                  phoneNumber: "+91${phoneNoController.text.toString()}",
                   verificationCompleted: (phoneAuthCredential) {
                     auth
                         .signInWithCredential(phoneAuthCredential)
@@ -69,7 +69,9 @@ class _PhoneNumberState extends State<PhoneNumber> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => OTPScreens(mVerification:  verificationId,),
+                          builder: (context) => OTPScreens(
+                            mVerification: verificationId,
+                          ),
                         ));
                   },
                   codeAutoRetrievalTimeout: (verificationId) {},
@@ -102,7 +104,4 @@ class _PhoneNumberState extends State<PhoneNumber> {
       ],
     );
   }
-
-
-
 }

@@ -39,7 +39,7 @@ class _OTPScreensState extends State<OTPScreens> {
         child: Column(
           children: [
             Container(
-              height: 300,
+              height: 200,
               width: double.infinity,
               decoration: BoxDecoration(
                   image: DecorationImage(
@@ -61,15 +61,6 @@ class _OTPScreensState extends State<OTPScreens> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Container(
-                //   height: 50,
-                //   width: 50,
-                //   color: Colors.red,
-                // ) , Container(
-                //   height: 50,
-                //   width: 50,
-                //   color: Colors.red,
-                // )
                 CustomOtpTextFild(otpNo1Controller, true),
                 CustomOtpTextFild(otpNo2Controller, false),
                 CustomOtpTextFild(otpNo3Controller, false),
@@ -152,6 +143,7 @@ class _OTPScreensState extends State<OTPScreens> {
         maxLength: 1,
         maxLines: 1,
         autofocus: mAutoFouc,
+      //  keyboardType: TextInputType.number,
         onChanged: (value) {
           if (value.isNotEmpty) {
             FocusScope.of(context).nextFocus();

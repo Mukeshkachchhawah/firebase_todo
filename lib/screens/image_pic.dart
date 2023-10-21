@@ -51,7 +51,9 @@ class _ImageProfileState extends State<ImageProfile> {
       appBar: AppBar(),
       //   body: imageUrl != "" ? Image.network(imageUrl) : Container(),
 
-      body: Column(
+      body: 
+      
+      Column(
         children: [
           Center(
             child: InkWell(
@@ -128,6 +130,8 @@ class _ImageProfileState extends State<ImageProfile> {
               child: Text("Upload"))
         ],
       ),
+    
+    
     );
   }
 }

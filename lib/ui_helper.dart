@@ -16,14 +16,17 @@ Widget wSpacher({mWidht = 11.0}) {
 //  return DecoratedBox(decoration: InputDecoration())
 // }
 
-Widget SocilMedia(Icon icons, VoidCallback ontap) {
+Widget SocilMedia(VoidCallback ontap, String image) {
   return InkWell(
     onTap: ontap,
     child: Container(
-      height: 70,
-      width: 70,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-      child: icons,
+      height: 50,
+      width: 80,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: Colors.black)),
+      child: Center(
+        child: Image.asset(image,  height: 30, width: 50,),
+      ),
     ),
   );
 }

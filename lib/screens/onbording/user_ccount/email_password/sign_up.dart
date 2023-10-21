@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_todo_ui/modal/user_modal.dart';
 import 'package:firebase_todo_ui/ui_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:rive/rive.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../phone_auth/phone_number.dart';
 import 'sign_in.dart';
@@ -22,57 +26,21 @@ class _SignUpUpState extends State<SignUp> {
   var emailController = TextEditingController();
   var passController = TextEditingController();
   var confromPasswrod = TextEditingController();
+  var phoneNoController = TextEditingController();
+  var addressController = TextEditingController();
 
-  FocusNode username = FocusNode();
-  FocusNode emailNode = FocusNode();
-  FocusNode passNode = FocusNode();
-  FocusNode confpassNode = FocusNode();
   bool isHide = false;
 
-  StateMachineController? machineController;
-  SMIInput<bool>? isChecking;
-  SMIInput<double>? numLook;
-  SMIInput<bool>? isHandsUp;
-  SMIInput<bool>? trigSuccess;
-  SMIInput<bool>? trigFail;
+  ////// user profile
+  var storage = FirebaseStorage.instance.ref();
+  // late Reference downloadRef;
+  late ListResult downloadRef;
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
+  String imageUrl = "";
 
-    username.addListener(userName);
-    emailNode.addListener(focusEmail);
+  List<String> arrImg = [];
 
-    passNode.addListener(focusPass);
-    confpassNode.addListener(confPassword);
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    username.removeListener(userName);
-    emailNode.removeListener(focusEmail);
-    passNode.removeListener(focusPass);
-    confpassNode.removeListener(confPassword);
-  }
-
-  void userName() {
-    isChecking!.change(username.hasFocus);
-  }
-
-  void focusPass() {
-    isHandsUp!.change(passNode.hasFocus);
-  }
-
-  void focusEmail() {
-    isChecking!.change(emailNode.hasFocus);
-  }
-
-  void confPassword() {
-    isHandsUp!.change(confpassNode.hasFocus);
-  }
+  String imgPath = "";
 
   @override
   Widget build(BuildContext context) {
@@ -103,14 +71,13 @@ class _SignUpUpState extends State<SignUp> {
                 ),
                 hSpacher(),
 
-                /// Rive Animation
-                RiveAnimationUse(),
-                hSpacher(mHeight: 150.0),
-
                 Text(
                   "User Sign Up",
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
+
+                hSpacher(),
+                UserProfile(),
                 hSpacher(),
 
                 /// Add User Form TextForm Fild
@@ -122,6 +89,7 @@ class _SignUpUpState extends State<SignUp> {
                     var mPass = passController.text.toString();
 
                     var auth = FirebaseAuth.instance;
+if(formKey.currentState!.validate()){
 
                     try {
                       auth
@@ -140,8 +108,7 @@ class _SignUpUpState extends State<SignUp> {
                             gender: "mal",
                             mobNo: "91 2398843823",
                             password: passController.text.toString(),
-                            confromPasswrod: confromPasswrod.text.toString()
-                            );
+                            confromPasswrod: confromPasswrod.text.toString());
                         var db = FirebaseFirestore.instance;
 
                         /// uid firebase auth uid
@@ -168,6 +135,7 @@ class _SignUpUpState extends State<SignUp> {
                     } catch (e) {
                       print(e);
                     }
+}
                   },
                   child: Container(
                     height: 50,
@@ -184,12 +152,6 @@ class _SignUpUpState extends State<SignUp> {
                   ),
                 ),
                 hSpacher(),
-
-                /// Divider
-                ReadMore(),
-
-                /// Social Media
-                MoreLogin(),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -220,29 +182,83 @@ class _SignUpUpState extends State<SignUp> {
     );
   }
 
-  Widget RiveAnimationUse() {
-    return Center(
-      child: SizedBox(
-        height: 100,
-        width: 200,
-        child: RiveAnimation.asset(
-          "assets/animation/teddy-bear.riv",
-          fit: BoxFit.cover,
-          stateMachines: const ["Login Machine"],
-          onInit: (artboard) {
-            machineController =
-                StateMachineController.fromArtboard(artboard, "Login Machine");
-            if (machineController == null) return;
+  Widget UserProfile() {
+    return Column(
+      children: [
+        Center(
+          child: InkWell(
+            onTap: () async {
+              var imgXFile =
+                  await ImagePicker().pickImage(source: ImageSource.gallery);
+              if (imgXFile != null) {
+                var croppedImgFile = await ImageCropper().cropImage(
+                  sourcePath: imgXFile.path,
+                  aspectRatioPresets: [
+                    CropAspectRatioPreset.square,
+                    CropAspectRatioPreset.ratio3x2,
+                    CropAspectRatioPreset.original,
+                    CropAspectRatioPreset.ratio4x3,
+                    CropAspectRatioPreset.ratio16x9
+                  ],
+                  uiSettings: [
+                    AndroidUiSettings(
+                        toolbarTitle: 'Cropper',
+                        toolbarColor: Colors.deepOrange,
+                        toolbarWidgetColor: Colors.white,
+                        initAspectRatio: CropAspectRatioPreset.original,
+                        lockAspectRatio: false),
+                    IOSUiSettings(
+                      title: 'Cropper',
+                    ),
+                    WebUiSettings(
+                      context: context,
+                    ),
+                  ],
+                );
 
-            artboard.addController(machineController!);
-            isChecking = machineController!.findInput("isChecking");
-            numLook = machineController!.findInput("numLook");
-            isHandsUp = machineController!.findInput("isHandsUp");
-            trigSuccess = machineController!.findInput("trigSuccess");
-            trigFail = machineController!.findInput("trigFail");
-          },
+                if (croppedImgFile != null) {
+                  imgPath = croppedImgFile.path;
+                  setState(() {});
+                }
+                setState(() {});
+              }
+            },
+            child: imgPath != " "
+                ? Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                            image: FileImage(File(imgPath)),
+                            fit: BoxFit.cover)),
+                  )
+                : Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: NetworkImage(
+                                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzBpnouxDuF063trW5gZOyXtyuQaExCQVMYA&usqp=CAU"))),
+                  ),
+          ),
         ),
-      ),
+        ElevatedButton(
+            onPressed: () {
+              var timeMilisecond = DateTime.now().microsecondsSinceEpoch;
+              var uploadRef =
+                  storage.child("images/profile_pic/img_$timeMilisecond.jpg");
+
+              if (imgPath != "") {
+                /// upload
+                uploadRef
+                    .putFile(File(imgPath))
+                    .then((p0) => print("File Uploaded"));
+              }
+            },
+            child: Text("Upload"))
+      ],
     );
   }
 
@@ -251,12 +267,11 @@ class _SignUpUpState extends State<SignUp> {
       children: [
         TextFormField(
           controller: userNameController,
-          focusNode: username,
-          onTapOutside: (event) {
-            FocusManager.instance.primaryFocus!.unfocus();
-          },
-          onChanged: (value) {
-            numLook!.change(value.length + 10);
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'Enter Your user name';
+            }
+            return null;
           },
           decoration: InputDecoration(
               hintText: "User Name", border: OutlineInputBorder()),
@@ -264,17 +279,11 @@ class _SignUpUpState extends State<SignUp> {
         hSpacher(),
         TextFormField(
           controller: emailController,
-          focusNode: emailNode,
-          onTapOutside: (event) {
-            FocusManager.instance.primaryFocus!.unfocus();
-          },
-          onChanged: (value) {
-            numLook!.change(value.length + 10);
-          },
           validator: (value) {
-            if (value!.isEmpty) {
+            if (value == "" || !value!.contains("@")) {
               return 'Enter Your Valid Email';
             }
+            return null;
           },
           decoration: InputDecoration(
               hintText: "Email",
@@ -282,12 +291,14 @@ class _SignUpUpState extends State<SignUp> {
                   OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
         ),
         hSpacher(),
-        TextField(
-          focusNode: passNode,
+        TextFormField(
           controller: passController,
           obscureText: isHide,
-          onTapOutside: (event) {
-            FocusManager.instance.primaryFocus!.unfocus();
+          validator: (value) {
+            if (value == "" || value!.length < 5) {
+              return 'Enter Your password';
+            }
+            return null;
           },
           decoration: InputDecoration(
               hintText: "Password",
@@ -303,12 +314,17 @@ class _SignUpUpState extends State<SignUp> {
                   OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
         ),
         hSpacher(),
-        TextField(
-          focusNode: confpassNode,
+        TextFormField(
           controller: confromPasswrod,
           obscureText: isHide,
           onTapOutside: (event) {
             FocusManager.instance.primaryFocus!.unfocus();
+          },
+          validator: (value) {
+            if (value == "" || value!.length < 5) {
+              return 'confrom passwrod';
+            }
+            return null;
           },
           decoration: InputDecoration(
               hintText: "Confrom Password",
@@ -323,54 +339,40 @@ class _SignUpUpState extends State<SignUp> {
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
         ),
+        hSpacher(),
+        TextFormField(
+          controller: phoneNoController,
+          obscureText: isHide,
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'Enter Your phone number';
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+              hintText: "Phone Number",
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+        ),
+        hSpacher(),
+        TextFormField(
+          controller: addressController,
+          obscureText: isHide,
+          onTapOutside: (event) {
+            FocusManager.instance.primaryFocus!.unfocus();
+          },
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'Enter Your address';
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+              hintText: "Address",
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+        )
       ],
     );
   }
-}
-
-Widget ReadMore() {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Container(
-        height: 2,
-        width: 120,
-        color: Colors.black,
-      ),
-      wSpacher(),
-      Text("more sign In"),
-      wSpacher(),
-      Container(
-        height: 2,
-        width: 120,
-        color: Colors.black,
-      ),
-    ],
-  );
-}
-
-Widget MoreLogin() {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: [
-      SocilMedia(
-        Icon(
-          Icons.facebook,
-        ),
-        () {},
-      ),
-      SocilMedia(
-        Icon(
-          Icons.face,
-        ),
-        () {},
-      ),
-      SocilMedia(
-        Icon(
-          Icons.facebook,
-        ),
-        () {},
-      ),
-    ],
-  );
 }

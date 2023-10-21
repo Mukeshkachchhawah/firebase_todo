@@ -1,6 +1,8 @@
+import 'package:firebase_todo_ui/screens/onbording/splash_screens.dart';
 import 'package:firebase_todo_ui/ui_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../home_page.dart';
 
@@ -12,7 +14,8 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
-  var formKey = GlobalKey<FormState>();
+   var _formKey = GlobalKey<FormState>();
+
   FocusNode emailNode = FocusNode();
 
   FocusNode passNode = FocusNode();
@@ -20,7 +23,7 @@ class _SignInState extends State<SignIn> {
   var txtEmailController = TextEditingController();
 
   var txtPassController = TextEditingController();
-  var userController =TextEditingController();
+  var userController = TextEditingController();
   bool isHide = false;
 
   StateMachineController? machineController;
@@ -63,6 +66,7 @@ class _SignInState extends State<SignIn> {
         padding: const EdgeInsets.only(left: 10, right: 10, top: 50),
         child: SingleChildScrollView(
           child: Form(
+            key: _formKey,
             child: Column(
               // mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,24 +79,20 @@ class _SignInState extends State<SignIn> {
                 hSpacher(mHeight: 20.0),
                 UserInput(),
                 hSpacher(),
-                CustomTextFild(userController, (event) {
-            FocusManager.instance.primaryFocus!.unfocus();
-          },(value) {
-            numLook!.change(value.length + 10);
-          }, (value) {
-            if (value!.isEmpty) {
-              return 'Enter Your Valid Email';
-            }
-          }, "User", ),
+
                 hSpacher(),
                 InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(),
-                        ));
-                  },
+                  onTap: () async {
+                  // ////// If Successfully Logged in(creds are Correct ////////)
+
+                  if (_formKey.currentState!.validate()) {
+                    var sp = await SharedPreferences.getInstance();
+                    sp.setBool(SplashScreenState.LOGIN_KEY, true);
+
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => HomePage()));
+                  }
+                },
                   child: Container(
                     height: 50,
                     width: double.infinity,
@@ -127,6 +127,8 @@ class _SignInState extends State<SignIn> {
                   ],
                 ),
                 hSpacher(),
+
+                MoreLogin()
               ],
             ),
           ),
@@ -175,9 +177,10 @@ class _SignInState extends State<SignIn> {
             numLook!.change(value.length + 10);
           },
           validator: (value) {
-            if (value!.isEmpty) {
-              return 'Enter Your Valid Email';
+            if (value == "" || !value!.contains("@")) {
+              return 'Enter uour valid email';
             }
+            return null;
           },
           decoration: InputDecoration(
               hintText: "Email",
@@ -185,12 +188,18 @@ class _SignInState extends State<SignIn> {
                   OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
         ),
         hSpacher(),
-        TextField(
+        TextFormField(
           focusNode: passNode,
           controller: txtPassController,
           obscureText: isHide,
           onTapOutside: (event) {
             FocusManager.instance.primaryFocus!.unfocus();
+          },
+          validator: (value) {
+            if (value == "" || value!.length < 5) {
+              return "Please enter valid Password(length must be 6 characters)!";
+            }
+            return null;
           },
           decoration: InputDecoration(
               hintText: "Password",
@@ -208,4 +217,24 @@ class _SignInState extends State<SignIn> {
       ],
     );
   }
+
+  Widget MoreLogin() {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      SocilMedia(
+       
+        () {},
+        /// facebook image
+       "assets/images/google.png"
+      ),
+    
+      SocilMedia(() { }, 
+
+      /// google image
+"assets/images/facebook.webp")
+     
+    ],
+  );
+}
 }

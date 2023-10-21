@@ -29,8 +29,8 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
 
-        home: ImageProfile(),
-        // home: SplashScreen(),
+      //  home: ImageProfile(),
+         home: SplashScreen(),
       ),
     );
   }

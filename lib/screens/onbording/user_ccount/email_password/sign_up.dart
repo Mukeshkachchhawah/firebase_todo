@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_todo_ui/modal/user_modal.dart';
 import 'package:firebase_todo_ui/ui_helper.dart';
@@ -88,54 +89,54 @@ class _SignUpUpState extends State<SignUp> {
                     var mEmail = emailController.text.toString();
                     var mPass = passController.text.toString();
 
-                    var auth = FirebaseAuth.instance;
-if(formKey.currentState!.validate()){
+                    print("object");
 
-                    try {
-                      auth
-                          .createUserWithEmailAndPassword(
-                              email: mEmail, password: mPass)
-                          .then((value) {
-                        print("Added Account");
-// add UserModal Class Data
-                        var userModal = UserModal(
-                            uid: value.user!.uid,
-                            name: userNameController.text.toString(),
-                            email: mEmail,
-                            age: "21",
-                            address: "jpodhpur",
-                            dob: "12/3/2021",
-                            gender: "mal",
-                            mobNo: "91 2398843823",
-                            password: passController.text.toString(),
-                            confromPasswrod: confromPasswrod.text.toString());
-                        var db = FirebaseFirestore.instance;
-
-                        /// uid firebase auth uid
-                        /// tojson UserModal se
-                        db
-                            .collection("users")
-                            .doc(value.user!.uid)
-                            .set(userModal.tojson())
+                    //// check condition by block is empty
+                    if (formKey.currentState!.validate()) {
+                      //// us try and catch add data firebase
+                      try {
+                        final credential = FirebaseAuth.instance
+                            .createUserWithEmailAndPassword(
+                          email: mEmail,
+                          password: mPass,
+                        )
                             .then((value) {
-                          print("User Added");
+                          print("Added Complet");
+                          var userModal = UserModal(
+                              address: "jodhpur",
+                              age: "21",
+                              confromPasswrod: confromPasswrod.text.toString(),
+                              dob: "21/11/1241",
+                              email: emailController.text.toString(),
+                              gender: "fem",
+                              mobNo: "121231234",
+                              name: userNameController.text.toString(),
+                              password: passController.text.toString(),
+                              uid: value.user!.uid);
+                          var db = FirebaseFirestore.instance;
+                          db
+                              .collection("user")
+                              .doc(value.user!.uid)
+                              .set(userModal.tojson())
+                              .then((value) {
+                            print("User data add");
+                          });
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SignIn(),
+                              ));
                         });
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SignIn(),
-                            ));
-                      });
-                    } on FirebaseAuthException catch (e) {
-                      if (e.code == "Week Password") {
-                        print("THe Passwrod provided is tpp week");
-                      } else if (e.code == "Email is Alerdy in use") {
-                        print("The Account Add");
+                      } on FirebaseAuthException catch (e) {
+                        if (e.code == 'weak-password') {
+                          print('The password provided is too weak.');
+                        } else if (e.code == 'email-already-in-use') {
+                          print('The account already exists for that email.');
+                        }
+                      } catch (e) {
+                        print(e);
                       }
-                    } catch (e) {
-                      print(e);
                     }
-}
                   },
                   child: Container(
                     height: 50,
@@ -228,7 +229,7 @@ if(formKey.currentState!.validate()){
                     height: 100,
                     width: 100,
                     decoration: BoxDecoration(
-                        color: Colors.red,
+                        color: Colors.grey,
                         shape: BoxShape.circle,
                         image: DecorationImage(
                             image: FileImage(File(imgPath)),
@@ -322,7 +323,7 @@ if(formKey.currentState!.validate()){
           },
           validator: (value) {
             if (value == "" || value!.length < 5) {
-              return 'confrom passwrod';
+              return 'Confrom passwrod';
             }
             return null;
           },
@@ -342,13 +343,13 @@ if(formKey.currentState!.validate()){
         hSpacher(),
         TextFormField(
           controller: phoneNoController,
-          obscureText: isHide,
           validator: (value) {
             if (value!.isEmpty) {
               return 'Enter Your phone number';
             }
             return null;
           },
+          keyboardType: TextInputType.number,
           decoration: InputDecoration(
               hintText: "Phone Number",
               border:
@@ -357,10 +358,6 @@ if(formKey.currentState!.validate()){
         hSpacher(),
         TextFormField(
           controller: addressController,
-          obscureText: isHide,
-          onTapOutside: (event) {
-            FocusManager.instance.primaryFocus!.unfocus();
-          },
           validator: (value) {
             if (value!.isEmpty) {
               return 'Enter Your address';

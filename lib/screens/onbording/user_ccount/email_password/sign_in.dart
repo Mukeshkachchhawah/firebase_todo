@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_todo_ui/screens/onbording/splash_screens.dart';
 import 'package:firebase_todo_ui/ui_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rive/rive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 import '../../../home_page.dart';
 
@@ -14,7 +17,7 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
-   var _formKey = GlobalKey<FormState>();
+  var _formKey = GlobalKey<FormState>();
 
   FocusNode emailNode = FocusNode();
 
@@ -72,6 +75,10 @@ class _SignInState extends State<SignIn> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 hSpacher(),
+                Text(
+                  "Sign In",
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                ),
 
                 /// Rive Animation Add
                 RiveAnimationUse(),
@@ -83,16 +90,16 @@ class _SignInState extends State<SignIn> {
                 hSpacher(),
                 InkWell(
                   onTap: () async {
-                  // ////// If Successfully Logged in(creds are Correct ////////)
+                    // ////// If Successfully Logged in(creds are Correct ////////)
 
-                  if (_formKey.currentState!.validate()) {
-                    var sp = await SharedPreferences.getInstance();
-                    sp.setBool(SplashScreenState.LOGIN_KEY, true);
+                    if (_formKey.currentState!.validate()) {
+                      var sp = await SharedPreferences.getInstance();
+                      sp.setBool(SplashScreenState.LOGIN_KEY, true);
 
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomePage()));
-                  }
-                },
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => HomePage()));
+                    }
+                  },
                   child: Container(
                     height: 50,
                     width: double.infinity,
@@ -219,22 +226,59 @@ class _SignInState extends State<SignIn> {
   }
 
   Widget MoreLogin() {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: [
-      SocilMedia(
-       
-        () {},
-        /// facebook image
-       "assets/images/google.png"
-      ),
-    
-      SocilMedia(() { }, 
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        SocilMedia(() {
+          print("Hy");
+          googleSingIn();
+        },
 
-      /// google image
-"assets/images/facebook.webp")
-     
-    ],
-  );
-}
+            /// facebook image
+            "assets/images/google.png"),
+        SocilMedia(
+            () {},
+
+            /// google image
+            "assets/images/facebook.webp")
+      ],
+    );
+  }
+
+  /// sign in google
+  googleSingIn() async {
+    GoogleSignIn _googlesingIn = GoogleSignIn();
+    try {
+      var result = await _googlesingIn.signIn();
+      if (result == null) {
+        return;
+      }
+      final userData = await result.authentication;
+      final credential = GoogleAuthProvider.credential(
+          accessToken: userData.accessToken, idToken: userData.idToken);
+      var finalResult =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      print("Result $result");
+      print(result.displayName);
+      print(result.email);
+      print(result.photoUrl);
+    } catch (error) {
+      print("Error");
+    }
+  }
+
+//// sign in facebook
+  facebookLogin() {
+    Future<UserCredential> signInWithFacebook() async {
+      // Trigger the sign-in flow
+      final LoginResult loginResult = await FacebookAuth.instance.login();
+
+      // Create a credential from the access token
+      final OAuthCredential facebookAuthCredential =
+          FacebookAuthProvider.credential(loginResult.accessToken!.token);
+
+      // Once signed in, return the UserCredential
+      return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+    }
+  }
 }

@@ -21,7 +21,7 @@ class SplashScreenState extends State<SplashScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    whereToGo();
+   whereToGo();
   }
 
   // void SherPref()async{
@@ -31,11 +31,18 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text(
-          "Splash Screens",
-          style: TextStyle(fontSize: 20),
-        ),
+      backgroundColor: Colors.indigo,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset("assets/images/to-do.png", scale: 3,),
+          Center(
+            child: Text(
+              "To-do List",
+              style: TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,10 +1,16 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_todo_ui/ui_helper.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+
+
+import 'profile_pic/profile_pic.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,8 +25,17 @@ class _HomePageState extends State<HomePage> {
   late TextEditingController titleController = TextEditingController();
   late TextEditingController deseController = TextEditingController();
 
-  File? file;
-  ImagePicker image = ImagePicker();
+ 
+  ////// user profile
+  var storage = FirebaseStorage.instance.ref();
+  // late Reference downloadRef;
+  late ListResult downloadRef;
+
+  String imageUrl = "";
+
+  List<String> arrImg = [];
+
+  String imgPath = "";
 
   @override
   void initState() {
@@ -94,6 +109,8 @@ class _HomePageState extends State<HomePage> {
                           print("Note Added ${value.id}");
                         });
                         Navigator.pop(context);
+                        titleController.clear();
+                        deseController.clear();
                       },
                       child: Text("Add")),
                 )
@@ -138,6 +155,7 @@ class _HomePageState extends State<HomePage> {
                       hintText: "Title",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10))),
+                          
                 ),
                 //  CustomTextFild("titile"),
                 SizedBox(
@@ -165,6 +183,7 @@ class _HomePageState extends State<HomePage> {
                           "desc": deseController.text
                         });
                         Navigator.pop(context);
+                        
                       },
                       child: Text("Update")),
                 )
@@ -187,21 +206,16 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text("FireBase Todo"),
         actions: [
-          InkWell(
-            onTap: getCameraPic,
-            child: Icon(Icons.camera)),
-          wSpacher(),
-          InkWell(
-            onTap: getGalleryPic,
-            child: Icon(Icons.browse_gallery)),
+      
           Container(
-              margin: EdgeInsets.all(10),
-              height: 50,
-              width: 50,
+             height: 50,
+             width: 50,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
-                  color: const Color.fromARGB(255, 224, 221, 221)),
-              child: IconButton(onPressed: AddTodo, icon: Icon(Icons.add)))
+                  color: Color.fromARGB(255, 250, 0, 0)),
+                
+                 child: ProfilePicPage(),
+              )
         ],
       ),
       body: StreamBuilder(
@@ -249,14 +263,13 @@ class _HomePageState extends State<HomePage> {
           return Container();
         },
       ),
+
+      floatingActionButton: FloatingActionButton(onPressed:  AddTodo,
+      child: Icon(Icons.add),),
     );
   }
 
-  void getCameraPic() async {
-    var images = await image.pickImage(source: ImageSource.camera);
-  }
 
-  void getGalleryPic() async {
-    var images = await image.pickImage(source: ImageSource.gallery);
-  }
+
+ 
 }

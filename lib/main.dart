@@ -4,7 +4,6 @@ import 'package:firebase_todo_ui/provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'screens/image_pic.dart';
 import 'screens/onbording/splash_screens.dart';
 
 void main() async {

@@ -1,3 +1,7 @@
+
+
+
+
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,7 +32,7 @@ class _SignUpUpState extends State<SignUp> {
   var passController = TextEditingController();
   var confromPasswrod = TextEditingController();
   var phoneNoController = TextEditingController();
-  var addressController = TextEditingController();
+
 
   bool isHide = false;
 
@@ -56,20 +60,7 @@ class _SignUpUpState extends State<SignUp> {
               // mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    InkWell(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PhoneNumber(),
-                              ));
-                        },
-                        child: Text("Skip")),
-                  ],
-                ),
+                
                 hSpacher(),
 
                 Text(
@@ -78,9 +69,16 @@ class _SignUpUpState extends State<SignUp> {
                 ),
 
                 hSpacher(),
-                UserProfile(),
-                hSpacher(),
-
+              Center(
+                child: Container(
+                  height: 100,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(image: NetworkImage("https://static.thenounproject.com/png/736670-200.png"))
+                  ),
+                ),
+              ),
+              hSpacher(),
                 /// Add User Form TextForm Fild
                 UserInput(),
                 hSpacher(mHeight: 20.0),
@@ -175,91 +173,20 @@ class _SignUpUpState extends State<SignUp> {
                     )
                   ],
                 )
-              ],
+             
+             ,
+             hSpacher(mHeight: 20.0),
+             CustomContainer("Sign in Phoen Number", Colors.blue, () {
+               Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PhoneNumber(),
+                              ));
+              }) ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget UserProfile() {
-    return Column(
-      children: [
-        Center(
-          child: InkWell(
-            onTap: () async {
-              var imgXFile =
-                  await ImagePicker().pickImage(source: ImageSource.gallery);
-              if (imgXFile != null) {
-                var croppedImgFile = await ImageCropper().cropImage(
-                  sourcePath: imgXFile.path,
-                  aspectRatioPresets: [
-                    CropAspectRatioPreset.square,
-                    CropAspectRatioPreset.ratio3x2,
-                    CropAspectRatioPreset.original,
-                    CropAspectRatioPreset.ratio4x3,
-                    CropAspectRatioPreset.ratio16x9
-                  ],
-                  uiSettings: [
-                    AndroidUiSettings(
-                        toolbarTitle: 'Cropper',
-                        toolbarColor: Colors.deepOrange,
-                        toolbarWidgetColor: Colors.white,
-                        initAspectRatio: CropAspectRatioPreset.original,
-                        lockAspectRatio: false),
-                    IOSUiSettings(
-                      title: 'Cropper',
-                    ),
-                    WebUiSettings(
-                      context: context,
-                    ),
-                  ],
-                );
-
-                if (croppedImgFile != null) {
-                  imgPath = croppedImgFile.path;
-                  setState(() {});
-                }
-                setState(() {});
-              }
-            },
-            child: imgPath != " "
-                ? Container(
-                    height: 100,
-                    width: 100,
-                    decoration: BoxDecoration(
-                        color: Colors.grey,
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                            image: FileImage(File(imgPath)),
-                            fit: BoxFit.cover)),
-                  )
-                : Container(
-                    height: 100,
-                    width: 100,
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: NetworkImage(
-                                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzBpnouxDuF063trW5gZOyXtyuQaExCQVMYA&usqp=CAU"))),
-                  ),
-          ),
-        ),
-        ElevatedButton(
-            onPressed: () {
-              var timeMilisecond = DateTime.now().microsecondsSinceEpoch;
-              var uploadRef =
-                  storage.child("images/profile_pic/img_$timeMilisecond.jpg");
-
-              if (imgPath != "") {
-                /// upload
-                uploadRef
-                    .putFile(File(imgPath))
-                    .then((p0) => print("File Uploaded"));
-              }
-            },
-            child: Text("Upload"))
-      ],
     );
   }
 
@@ -341,35 +268,9 @@ class _SignUpUpState extends State<SignUp> {
                   OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
         ),
         hSpacher(),
-        TextFormField(
-          controller: phoneNoController,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'Enter Your phone number';
-            }
-            return null;
-          },
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-              hintText: "Phone Number",
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
-        ),
-        hSpacher(),
-        TextFormField(
-          controller: addressController,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'Enter Your address';
-            }
-            return null;
-          },
-          decoration: InputDecoration(
-              hintText: "Address",
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
-        )
+     
       ],
     );
   }
 }
+
